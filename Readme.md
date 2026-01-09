@@ -7,3 +7,7 @@
 3. knife4j的使用方法:
     + knife4j是一个spring boot starter(什么是starter)
     + @Configuration的使用方法, 还有@Bean, 他们和starter有什么关系
+4. 什么是MVC, 为什么要进行web mvc配置
+    + M(model): 数据/业务
+    + V(view): 展示
+    + C(control): 控制
