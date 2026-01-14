@@ -15,7 +15,9 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Dish implements Serializable {
+public class Dish
+        extends BaseEntity
+        implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,13 +40,5 @@ public class Dish implements Serializable {
 
     //0 停售 1 起售
     private Integer status;
-
-    private LocalDateTime createTime;
-
-    private LocalDateTime updateTime;
-
-    private Long createUser;
-
-    private Long updateUser;
 
 }
