@@ -7,10 +7,13 @@ import java.io.Serializable;
 @Data
 public class DishPageQueryDTO implements Serializable {
 
-    private int page;
+    //页码
+    private Integer page;
 
-    private int pageSize;
+    //每页记录数
+    private Integer pageSize;
 
+    //菜品名称
     private String name;
 
     //分类id

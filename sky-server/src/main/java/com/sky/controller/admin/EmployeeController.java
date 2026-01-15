@@ -135,6 +135,7 @@ public class EmployeeController {
     @PutMapping()
     @Operation(summary = "编辑员工信息")
     public Result updateById(@RequestBody EmployeeDTO employeeDTO) {
+        log.info("编辑员工信息: {}", employeeDTO);
         employeeService.updateById(employeeDTO);
         return Result.success();
     }
