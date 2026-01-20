@@ -35,4 +35,12 @@ public interface DishMapper extends BaseMapper<Dish> {
      */
     @Select("select count(*) from setmeal_dish where dish_id = #{dishId}")
     Integer countByDishId(Long dishId);
+
+    /**
+     * 根据分类id查询菜品列表
+     * @param categoryId
+     * @return
+     */
+    @Select("select * from dish where category_id = #{categoryId}")
+    List<Dish> list(Long categoryId);
 }

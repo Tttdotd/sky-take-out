@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 菜品管理
  */
@@ -89,4 +91,19 @@ public class DishController {
         dishService.startOrStop(status, id);
         return Result.success();
     }
+
+    /**
+     * 根据分类id查询菜品
+     * @param categoryId
+     * @return
+     */
+    @GetMapping("/list")
+    @Operation(summary = "根据分类id查询菜品")
+    public Result<List<Dish>> list(Long categoryId) {
+        log.info("根据分类id查询菜品: categoryId={}", categoryId);
+        List<Dish> list = dishService.list(categoryId);
+        return Result.success(list);
+    }
+
+    
 }
