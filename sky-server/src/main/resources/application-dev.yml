@@ -1,4 +1,8 @@
 sky:
+  redis:
+    host: localhost
+    port: 6379
+    password: 20030503_Zrd
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     host: localhost
