@@ -2,7 +2,10 @@ package com.sky.service;
 
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
+import com.sky.entity.Dish;
 import com.sky.result.PageResult;
+
+import java.util.List;
 
 public interface DishService {
     /**
@@ -36,4 +39,11 @@ public interface DishService {
      * @param id 菜品id
      */
     void startOrStop(Integer status, Long id);
+
+    /**
+     * 根据分类id查询菜品列表
+     * @param categoryId
+     * @return
+     */
+    List<Dish> list(Long categoryId);
 }
