@@ -38,9 +38,8 @@ public interface DishMapper extends BaseMapper<Dish> {
 
     /**
      * 根据分类id查询菜品列表
-     * @param categoryId
+     * @param dish
      * @return
      */
-    @Select("select * from dish where category_id = #{categoryId}")
-    List<Dish> list(Long categoryId);
+    List<Dish> list(Dish dish);
 }

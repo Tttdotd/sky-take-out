@@ -30,6 +30,7 @@
         <jaxb-api>2.3.1</jaxb-api>
         <poi>3.16</poi>
         <mybatis-plus>3.5.15</mybatis-plus>
+        <httpclient>4.5.13</httpclient>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -120,6 +121,13 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus}</version>
+            </dependency>
+
+            <!-- httpclient -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
