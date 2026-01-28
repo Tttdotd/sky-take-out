@@ -22,6 +22,8 @@ import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,6 +69,7 @@ public class SetMealServiceImpl implements SetMealService {
      */
     @Transactional
     @Override
+    @CacheEvict(value = "setmeal", key = "#setmealDTO.categoryId")
     public void saveWithDish(SetmealDTO setmealDTO) {
         //创建Setmeal实体
         Setmeal setmeal = new Setmeal();
@@ -95,6 +98,7 @@ public class SetMealServiceImpl implements SetMealService {
      */
     @Transactional
     @Override
+    @CacheEvict(value = "setmeal", allEntries = true)
     public void deleteBatch(List<Long> ids) {
         //判断是否可以删除：是否存在起售中的套餐
         for (Long id : ids) {
@@ -155,6 +159,7 @@ public class SetMealServiceImpl implements SetMealService {
      */
     @Transactional
     @Override
+    @CacheEvict(value = "setmeal", allEntries = true)
     public void updateWithDish(SetmealDTO setmealDTO) {
         //更新套餐基本信息
         Setmeal setmeal = new Setmeal();
@@ -184,10 +189,11 @@ public class SetMealServiceImpl implements SetMealService {
 
     /**
      * 套餐起售、停售
-     * @param status
-     * @param id
+     * @param status 套餐状态
+     * @param id 套餐id
      */
     @Override
+    @CacheEvict(value = "setmeal", allEntries = true)
     public void startOrStop(Integer status, Long id) {
         //起售套餐时，需要判断套餐内是否有停售菜品，如果有停售菜品提示"套餐内包含未启售菜品，无法启售"
         if (status == 1) {

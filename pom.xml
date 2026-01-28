@@ -129,6 +129,7 @@
                 <artifactId>httpclient</artifactId>
                 <version>${httpclient}</version>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 </project>

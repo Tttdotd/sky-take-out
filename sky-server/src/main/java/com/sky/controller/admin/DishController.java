@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,9 @@ import java.util.List;
 public class DishController {
     @Autowired
     private DishService dishService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 新增菜品
@@ -61,6 +65,8 @@ public class DishController {
     public Result delete(@RequestParam("ids") String ids) {
         log.info("批量删除菜品: {}", ids);
         dishService.deleteBatch(ids);
+
+        //TODO: 清理缓存
         return Result.success();
     }
 
@@ -75,6 +81,9 @@ public class DishController {
         //TODO: 还需要一个当前所改菜品的id, 需要改前端代码
         log.info("修改菜品信息: {}", dishDTO);
         dishService.updateWithFlavor(dishDTO);
+
+        //TODO: 清理缓存
+
         return Result.success();
     }
 
@@ -89,6 +98,8 @@ public class DishController {
     public Result startOrStop(@PathVariable("status") Integer status, Long id) {
         log.info("起售/停售菜品: status={}, id={}", status, id);
         dishService.startOrStop(status, id);
+
+        //TODO: 清理缓存
         return Result.success();
     }
 
