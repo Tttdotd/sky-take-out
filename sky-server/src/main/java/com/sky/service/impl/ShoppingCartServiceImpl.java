@@ -35,7 +35,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      */
     @Override
     public void addShoppingCart(ShoppingCartDTO shoppingCartDTO) {
-        log.info("添加购物车: {}", shoppingCartDTO);
         ShoppingCart shoppingCart = new ShoppingCart();
         BeanUtils.copyProperties(shoppingCartDTO, shoppingCart);
         Long userId = BaseContext.getCurrentId();
@@ -80,7 +79,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      */
     @Override
     public List<ShoppingCart> showShoppingCart() {
-        log.info("查看购物车");
         Long userId = BaseContext.getCurrentId();
         ShoppingCart shoppingCart = ShoppingCart.builder()
                 .userId(userId)
@@ -93,7 +91,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      */
     @Override
     public void cleanShoppingCart() {
-        log.info("清空购物车");
         Long userId = BaseContext.getCurrentId();
         shoppingCartMapper.deleteByUserId(userId);
     }
@@ -105,7 +102,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      */
     @Override
     public void subShoppingCart(ShoppingCartDTO shoppingCartDTO) {
-        log.info("删除购物车中一个商品: {}", shoppingCartDTO);
         ShoppingCart shoppingCart = new ShoppingCart();
         BeanUtils.copyProperties(shoppingCartDTO, shoppingCart);
         shoppingCart.setUserId(BaseContext.getCurrentId());

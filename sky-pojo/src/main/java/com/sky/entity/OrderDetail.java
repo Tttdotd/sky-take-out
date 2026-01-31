@@ -1,5 +1,6 @@
 package com.sky.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.math.BigDecimal;
  */
 @Data
 @Builder
+@TableName("order_detail")
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDetail implements Serializable {
