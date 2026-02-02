@@ -22,6 +22,7 @@ import com.sky.service.ShoppingCartService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -349,10 +350,8 @@ public class OrderServiceImpl implements OrderService {
         // 1. 开启分页
         PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
 
-        // 2. 执行条件查询
-        Long userId = BaseContext.getCurrentId();
-        Integer status = ordersPageQueryDTO.getStatus();
-        Page<Orders> page = orderMapper.pageQueryByUserId(userId, status);
+        // 2. 执行条件查询（管理端支持订单号、手机号、状态、时间区间等条件）
+        Page<Orders> page = orderMapper.conditionSearch(ordersPageQueryDTO);
 
         List<Orders> ordersList = page.getResult();
         if (ordersList == null || ordersList.isEmpty()) {
@@ -394,5 +393,49 @@ public class OrderServiceImpl implements OrderService {
 
         // 4. 封装分页结果返回
         return new PageResult(page.getTotal(), voList);
+    }
+
+    /**
+     * 各个状态的订单数量统计
+     */
+    @Override
+    public OrderStatisticsVO statistics() {
+        // 待接单数量
+        Integer toBeConfirmed = orderMapper.countByStatus(Orders.TO_BE_CONFIRMED);
+        // 待派送（已接单）数量
+        Integer confirmed = orderMapper.countByStatus(Orders.CONFIRMED);
+        // 派送中数量
+        Integer deliveryInProgress = orderMapper.countByStatus(Orders.DELIVERY_IN_PROGRESS);
+
+        OrderStatisticsVO vo = new OrderStatisticsVO();
+        vo.setToBeConfirmed(toBeConfirmed);
+        vo.setConfirmed(confirmed);
+        vo.setDeliveryInProgress(deliveryInProgress);
+        return vo;
+    }
+
+    /**
+     * 管理端根据订单ID查询订单详情
+     *
+     * @param id 订单ID
+     * @return 订单详情（包含订单主表信息及明细列表）
+     */
+    @Override
+    public OrderVO details(Long id) {
+        // 1. 查询订单主表信息
+        Orders orders = orderMapper.selectById(id);
+        if (orders == null) {
+            return null;
+        }
+
+        // 2. 查询订单明细列表
+        List<OrderDetail> detailList = orderDetailMapper.getByOrderId(id);
+
+        // 3. 封装为 OrderVO
+        OrderVO vo = new OrderVO();
+        BeanUtils.copyProperties(orders, vo);
+        vo.setOrderDetailList(detailList);
+
+        return vo;
     }
 }

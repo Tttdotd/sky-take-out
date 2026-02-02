@@ -7,6 +7,7 @@ import com.sky.result.PageResult;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.vo.OrderStatisticsVO;
 
 public interface OrderService {
 
@@ -70,4 +71,19 @@ public interface OrderService {
      * @return 分页结果，记录为 OrderVO，包含订单菜品概览信息
      */
     PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO);
+
+    /**
+     * 各个状态的订单数量统计
+     *
+     * @return 订单状态统计结果
+     */
+    OrderStatisticsVO statistics();
+
+    /**
+     * 管理端根据订单ID查询订单详情
+     *
+     * @param id 订单ID
+     * @return 订单详情（包含订单信息及明细列表）
+     */
+    OrderVO details(Long id);
 }

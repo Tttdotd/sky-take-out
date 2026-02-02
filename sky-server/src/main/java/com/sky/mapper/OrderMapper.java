@@ -2,8 +2,8 @@ package com.sky.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.github.pagehelper.Page;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
-import com.sky.result.PageResult;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -20,5 +20,19 @@ public interface OrderMapper extends BaseMapper<Orders> {
      * @param status 订单状态，可为 null 表示不过滤
      * @return 当前页订单列表（PageHelper 会包装为 Page）
      */
-     Page<Orders> pageQueryByUserId(@Param("userId") Long userId, @Param("status") Integer status);
+    List<Orders> pageQueryByUserId(@Param("userId") Long userId, @Param("status") Integer status);
+
+    /**
+     * 管理端订单搜索（条件分页查询）
+     */
+    Page<Orders> conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO);
+
+    /**
+     * 根据订单状态统计数量
+     *
+     * @param status 订单状态
+     * @return 对应状态的订单数量
+     */
+    Integer countByStatus(@Param("status") Integer status);
+
 }
