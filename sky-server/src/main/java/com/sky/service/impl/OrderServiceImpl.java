@@ -2,21 +2,27 @@ package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
 import com.sky.exception.OrderBusinessException;
 import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
+import com.sky.mapper.ShoppingCartMapper;
 import com.sky.mapper.UserMapper;
+import com.sky.result.PageResult;
 import com.sky.service.AddressBookService;
 import com.sky.service.OrderService;
 import com.sky.service.ShoppingCartService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +50,8 @@ public class OrderServiceImpl implements OrderService {
     private UserMapper  userMapper;
     @Autowired
     private WeChatPayUtil  weChatPayUtil;
+    @Autowired
+    private ShoppingCartMapper shoppingCartMapper;
 
     /**
      * 用户下单
@@ -170,5 +178,221 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.updateById(orders);
+    }
+
+    /**
+     * 用户端分页查询历史订单（仅当前登录用户，确保不查询到他人订单）
+     * 每条订单封装为 OrderVO，并填充该订单下的所有 order_detail 明细。
+     */
+    @Override
+    public PageResult pageQueryUser(int page, int pageSize, Integer status) {
+        // 仅使用当前登录用户 ID，避免查询到非当前用户数据
+        Long userId = BaseContext.getCurrentId();
+
+        PageHelper.startPage(page, pageSize);
+        List<Orders> ordersList = orderMapper.pageQueryByUserId(userId, status);
+
+        if (ordersList == null || ordersList.isEmpty()) {
+            return new PageResult(0, new ArrayList<>());
+        }
+
+        // 将 PageHelper 包装后的 list 转为 Page 以获取 total
+        long total = ordersList instanceof Page ? ((Page<Orders>) ordersList).getTotal() : ordersList.size();
+        List<OrderVO> voList = new ArrayList<>();
+
+        for (Orders order : ordersList) {
+            OrderVO vo = new OrderVO();
+            BeanUtils.copyProperties(order, vo);
+            // 根据订单 ID 查询该订单下的所有明细，并设置到 OrderVO
+            List<OrderDetail> detailList = orderDetailMapper.selectList(
+                    new LambdaQueryWrapper<OrderDetail>().eq(OrderDetail::getOrderId, order.getId())
+            );
+            vo.setOrderDetailList(detailList);
+            voList.add(vo);
+        }
+
+        return new PageResult(total, voList);
+    }
+
+    /**
+     * 根据订单ID查询订单详情（含订单基础信息及订单明细列表）。
+     * 仅允许当前登录用户查询自己的订单，否则抛出 OrderBusinessException。
+     */
+    @Override
+    public OrderVO getDetails(Long id) {
+        // 根据 ID 查询订单基础信息
+        Orders order = orderMapper.selectById(id);
+        if (order == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        // 仅允许查询当前用户自己的订单，避免越权
+        Long currentUserId = BaseContext.getCurrentId();
+        if (!order.getUserId().equals(currentUserId)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        // 将订单属性拷贝到 OrderVO
+        OrderVO vo = new OrderVO();
+        BeanUtils.copyProperties(order, vo);
+
+        // 根据 order_id 查询该订单关联的所有订单明细
+        List<OrderDetail> detailList = orderDetailMapper.selectList(
+                new LambdaQueryWrapper<OrderDetail>().eq(OrderDetail::getOrderId, id)
+        );
+        vo.setOrderDetailList(detailList);
+
+        return vo;
+    }
+
+    /**
+     * 用户取消订单
+     *
+     * 业务规则：
+     *  - 仅允许当前登录用户取消自己的订单
+     *  - 仅待付款(1)、待接单(2) 状态可以取消
+     *  - 若订单为待接单且已支付，需要执行退款逻辑，并将支付状态改为退款(2)
+     *  - 统一将订单状态改为已取消(6)，记录取消原因和取消时间
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void userCancelById(Long id) {
+        // 1. 根据 ID 查询订单信息
+        Orders orders = orderMapper.selectById(id);
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        // 2. 校验订单归属权：仅允许当前登录用户操作自己的订单
+        Long currentUserId = BaseContext.getCurrentId();
+        if (!orders.getUserId().equals(currentUserId)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        // 3. 状态校验：仅待付款(1)、待接单(2) 可以取消
+        Integer status = orders.getStatus();
+        if (!Orders.PENDING_PAYMENT.equals(status) && !Orders.TO_BE_CONFIRMED.equals(status)) {
+            // 其他状态（已接单、派送中、已完成、已取消等）不允许取消
+            throw new OrderBusinessException("当前状态不可取消，请联系商家");
+        }
+
+        // 4. 若订单为待接单且已支付，则处理退款逻辑
+        if (Orders.TO_BE_CONFIRMED.equals(status) && Orders.PAID.equals(orders.getPayStatus())) {
+            // 理论上此处应调用微信退款接口
+            // 示例（实际项目中需完善出入参及异常处理逻辑）：
+            // weChatPayUtil.refund(orders.getNumber(), "REFUND_" + System.currentTimeMillis(),
+            //         orders.getAmount(), orders.getAmount());
+            //
+            // 此处先不真正调用微信接口，只在订单表中标记为退款状态
+        }
+
+        // 5. 构建要更新的订单数据
+        Orders update = Orders.builder()
+                .id(orders.getId())
+                .status(Orders.CANCELLED)
+                .cancelReason("用户取消")
+                .cancelTime(LocalDateTime.now())
+                .build();
+
+        // 若为待接单且已支付，则将支付状态标记为退款
+        if (Orders.TO_BE_CONFIRMED.equals(status) && Orders.PAID.equals(orders.getPayStatus())) {
+            update.setPayStatus(Orders.REFUND);
+        }
+
+        // 6. 更新订单
+        orderMapper.updateById(update);
+    }
+
+    /**
+     * 再来一单：根据历史订单的明细，批量加入当前用户购物车
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void repetition(Long id) {
+        // 1. 获取当前登录用户ID
+        Long currentUserId = BaseContext.getCurrentId();
+
+        // 2. 查询该订单对应的所有订单明细
+        List<OrderDetail> orderDetailList = orderDetailMapper.selectList(
+                new LambdaQueryWrapper<OrderDetail>().eq(OrderDetail::getOrderId, id)
+        );
+
+        // 若没有明细，直接返回，不做任何操作
+        if (orderDetailList == null || orderDetailList.isEmpty()) {
+            return;
+        }
+
+        // 3. 将订单明细转换为购物车数据列表
+        List<ShoppingCart> cartList = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        for (OrderDetail detail : orderDetailList) {
+            ShoppingCart cart = new ShoppingCart();
+            // 拷贝基础属性：name, image, dishId, setmealId, dishFlavor, number, amount
+            BeanUtils.copyProperties(detail, cart);
+
+            cart.setId(null);                 // 确保为新记录，由数据库自增生成主键
+            cart.setUserId(currentUserId);    // 设置为当前登录用户
+            cart.setCreateTime(now);          // 创建时间统一使用当前时间
+
+            cartList.add(cart);
+        }
+
+        // 4. 批量插入购物车，避免循环逐条插入 SQL
+        shoppingCartMapper.insert(cartList);
+    }
+
+    /**
+     * 管理端订单搜索（条件分页查询）
+     * 支持按订单号、手机号、状态、下单时间区间等条件进行查询，并封装订单菜品概览信息。
+     */
+    @Override
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        // 1. 开启分页
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+
+        // 2. 执行条件查询
+        Long userId = BaseContext.getCurrentId();
+        Integer status = ordersPageQueryDTO.getStatus();
+        Page<Orders> page = orderMapper.pageQueryByUserId(userId, status);
+
+        List<Orders> ordersList = page.getResult();
+        if (ordersList == null || ordersList.isEmpty()) {
+            return new PageResult(0, new ArrayList<>());
+        }
+
+        // 3. 封装为 OrderVO 列表，并为每个订单构建订单菜品概览字符串
+        List<OrderVO> voList = new ArrayList<>();
+        for (Orders orders : ordersList) {
+            OrderVO vo = new OrderVO();
+            BeanUtils.copyProperties(orders, vo);
+
+            // 查询该订单的所有明细
+            List<OrderDetail> detailList = orderDetailMapper.selectList(
+                    new LambdaQueryWrapper<OrderDetail>().eq(OrderDetail::getOrderId, orders.getId())
+            );
+            vo.setOrderDetailList(detailList);
+
+            // 构建订单菜品概览字符串，例如：宫保鸡丁*2; 米饭*1
+            if (detailList != null && !detailList.isEmpty()) {
+                StringBuilder dishesBuilder = new StringBuilder();
+                for (OrderDetail detail : detailList) {
+                    if (detail.getName() == null) {
+                        continue;
+                    }
+                    if (dishesBuilder.length() > 0) {
+                        dishesBuilder.append("; ");
+                    }
+                    dishesBuilder.append(detail.getName());
+                    if (detail.getNumber() != null) {
+                        dishesBuilder.append("*").append(detail.getNumber());
+                    }
+                }
+                vo.setOrderDishes(dishesBuilder.toString());
+            }
+
+            voList.add(vo);
+        }
+
+        // 4. 封装分页结果返回
+        return new PageResult(page.getTotal(), voList);
     }
 }
