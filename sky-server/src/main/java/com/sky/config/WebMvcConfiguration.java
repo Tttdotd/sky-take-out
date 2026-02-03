@@ -50,13 +50,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 处理Windows路径分隔符问题，统一转换为正斜杠
-        String normalizedPath = uploadPath.replace("\\", "/");
-        // 确保路径末尾有斜杠
-        if (!normalizedPath.endsWith("/")) {
-            normalizedPath += "/";
-        }
-        String wholePath = "file:" + normalizedPath;
+        String wholePath = "file:" + uploadPath;
         log.info("文件上传路径配置: {}", wholePath);
 
         registry.addResourceHandler("/upload/**")

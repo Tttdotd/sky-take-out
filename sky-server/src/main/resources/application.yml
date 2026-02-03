@@ -49,7 +49,7 @@ sky:
     # 设置前端传递过来的令牌名称
     user-token-name: authentication
   upload:
-    path: C:/sky-upload
+    path: G:/sky-upload/
   wechat:
     appid: ${sky.wechat.appid}
     secret: ${sky.wechat.secret}
