@@ -6,6 +6,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersCancelDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
@@ -437,5 +438,47 @@ public class OrderServiceImpl implements OrderService {
         vo.setOrderDetailList(detailList);
 
         return vo;
+    }
+
+    /**
+     * 管理端取消订单
+     *
+     * @param ordersCancelDTO 取消参数（包含订单ID和取消原因）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void cancel(OrdersCancelDTO ordersCancelDTO) throws Exception {
+        // 1. 根据ID查询订单信息
+        Orders orders = orderMapper.selectById(ordersCancelDTO.getId());
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        // 2. 如果订单已支付，则走退款流程
+        if (Orders.PAID.equals(orders.getPayStatus())) {
+            // 调用微信退款接口（实际环境中请根据业务完善参数和异常处理）
+            weChatPayUtil.refund(
+                    orders.getNumber(),                  // 商户订单号
+                    "REFUND_" + orders.getNumber(),      // 商户退款单号
+                    orders.getAmount(),                  // 退款金额
+                    orders.getAmount()                   // 原订单金额
+            );
+        }
+
+        // 3. 构建要更新的订单信息
+        Orders update = Orders.builder()
+                .id(orders.getId())
+                .status(Orders.CANCELLED)                         // 订单状态改为已取消
+                .cancelReason(ordersCancelDTO.getCancelReason()) // 取消原因
+                .cancelTime(LocalDateTime.now())                 // 取消时间
+                .build();
+
+        // 若为已支付订单，则将支付状态标记为退款
+        if (Orders.PAID.equals(orders.getPayStatus())) {
+            update.setPayStatus(Orders.REFUND);
+        }
+
+        // 4. 更新订单记录
+        orderMapper.updateById(update);
     }
 }
