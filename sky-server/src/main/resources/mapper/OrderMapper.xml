@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.OrderMapper">
+
+    <!-- 用户端历史订单分页查询：按 userId 必填、status 可选过滤，仅查询当前用户订单 -->
+    <select id="pageQueryByUserId" resultType="com.sky.entity.Orders">
+        select * from orders
+        <where>
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+        order by order_time desc
+    </select>
+
+    <!-- 管理端订单搜索：支持订单号、手机号、状态、下单时间区间等条件 -->
+    <select id="conditionSearch" resultType="com.sky.entity.Orders">
+        select *
+        from orders
+        <where>
+            <!-- 订单号模糊匹配 -->
+            <if test="number != null and number != ''">
+                and number like concat('%', #{number}, '%')
+            </if>
+            <!-- 手机号精确匹配 -->
+            <if test="phone != null and phone != ''">
+                and phone = #{phone}
+            </if>
+            <!-- 订单状态匹配 -->
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <!-- 下单时间区间：大于等于 beginTime，小于等于 endTime -->
+            <if test="beginTime != null and beginTime != ''">
+                and order_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                and order_time &lt;= #{endTime}
+            </if>
+        </where>
+        order by order_time desc
+    </select>
+
+    <!-- 根据状态统计订单数量 -->
+    <select id="countByStatus" resultType="java.lang.Integer">
+        select count(id) from orders
+        <where>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+</mapper>
