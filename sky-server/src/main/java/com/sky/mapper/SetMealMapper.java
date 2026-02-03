@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface SetMealMapper extends BaseMapper<Setmeal> {
@@ -53,4 +54,13 @@ public interface SetMealMapper extends BaseMapper<Setmeal> {
             "from setmeal_dish sd left join dish d on sd.dish_id = d.id " +
             "where sd.setmeal_id = #{setmealId}")
     List<DishItemVO> getDishItemBySetmealId(Long setmealId);
+
+    /**
+     * 根据Map条件统计套餐数量
+     * Map中可包含：status(状态)
+     *
+     * @param map 查询条件Map
+     * @return 套餐数量
+     */
+    Integer countByMap(Map map);
 }

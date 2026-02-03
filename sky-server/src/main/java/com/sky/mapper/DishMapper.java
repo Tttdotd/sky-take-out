@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface DishMapper extends BaseMapper<Dish> {
@@ -42,4 +43,13 @@ public interface DishMapper extends BaseMapper<Dish> {
      * @return
      */
     List<Dish> list(Dish dish);
+
+    /**
+     * 根据Map条件统计菜品数量
+     * Map中可包含：status(状态)
+     *
+     * @param map 查询条件Map
+     * @return 菜品数量
+     */
+    Integer countByMap(Map map);
 }

@@ -2,12 +2,17 @@ package com.sky.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.github.pagehelper.Page;
+import com.sky.dto.GoodsSalesDTO;
+import com.sky.dto.OrderStatisticDTO;
+import com.sky.dto.TurnoverStatisticDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface OrderMapper extends BaseMapper<Orders> {
@@ -35,4 +40,56 @@ public interface OrderMapper extends BaseMapper<Orders> {
      */
     Integer countByStatus(@Param("status") Integer status);
 
+    List<TurnoverStatisticDTO> sumAmountGroupByDate(
+            @Param("status") Integer status,
+            @Param("begin") LocalDateTime begin,
+            @Param("end") LocalDateTime end
+    );
+
+    /**
+     * 指定时间范围内，按天统计订单数量
+     *
+     * key: orderDate（yyyy-MM-dd），value: 订单总数
+     */
+     List<OrderStatisticDTO> countOrdersGroupByDate(@Param("begin") LocalDateTime begin,
+                                                   @Param("end") LocalDateTime end);
+
+    /**
+     * 指定时间范围内，按天统计已完成(有效)订单数量
+     *
+     * key: orderDate（yyyy-MM-dd），value: 有效订单数
+     */
+     List<OrderStatisticDTO> countValidOrdersGroupByDate(@Param("status") Integer status,
+                                                     @Param("begin") LocalDateTime begin,
+                                                     @Param("end") LocalDateTime end);
+
+    /**
+     * 销量排名前10：指定时间范围内已完成订单中，按商品名称汇总销量，取前10
+     *
+     * @param status 订单状态（已完成 = 5）
+     * @param begin  开始时间（含）
+     * @param end    结束时间（含）
+     * @return 商品名称与销量列表，按销量降序
+     */
+    List<GoodsSalesDTO> listTop10BySales(@Param("status") Integer status,
+                                        @Param("begin") LocalDateTime begin,
+                                        @Param("end") LocalDateTime end);
+
+    /**
+     * 根据Map条件统计订单数量
+     * Map中可包含：begin(开始时间)、end(结束时间)、status(订单状态)
+     *
+     * @param map 查询条件Map
+     * @return 订单数量
+     */
+    Integer countByMap(Map map);
+
+    /**
+     * 根据Map条件统计订单金额总和
+     * Map中可包含：begin(开始时间)、end(结束时间)、status(订单状态)
+     *
+     * @param map 查询条件Map
+     * @return 订单金额总和
+     */
+    Double sumByMap(Map map);
 }
