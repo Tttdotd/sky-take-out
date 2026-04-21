@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,10 +83,7 @@ public class SetMealServiceImpl implements SetMealService {
         //向套餐菜品关系表中插入n条数据
         List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
         if (setmealDishes != null && !setmealDishes.isEmpty()) {
-            for (SetmealDish setmealDish : setmealDishes) {
-                setmealDish.setSetmealId(setmealId);
-            }
-
+            setmealDishes.forEach(setmealDish -> setmealDish.setSetmealId(setmealId));
             setmealDishMapper.insert(setmealDishes);
         }
     }
@@ -177,13 +173,9 @@ public class SetMealServiceImpl implements SetMealService {
         //插入新的套餐菜品关系数据
         List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
         if (setmealDishes != null && !setmealDishes.isEmpty()) {
-            for (SetmealDish setmealDish : setmealDishes) {
-                setmealDish.setSetmealId(setmealId);
-            }
+            setmealDishes.forEach(setmealDish -> setmealDish.setSetmealId(setmealId));
             //批量插入套餐菜品关系数据
-            for (SetmealDish setmealDish : setmealDishes) {
-                setmealDishMapper.insert(setmealDish);
-            }
+            setmealDishMapper.insert(setmealDishes);
         }
     }
 

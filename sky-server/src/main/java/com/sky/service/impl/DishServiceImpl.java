@@ -61,11 +61,7 @@ public class DishServiceImpl implements DishService {
         //向口味表中插入n条数据
         List<DishFlavor> flavors = dishDTO.getFlavors();
         if (flavors != null && !flavors.isEmpty()) {
-
-            for (DishFlavor flavor : flavors) {
-                flavor.setDishId(dishId);
-            }
-
+            flavors.forEach(flavor -> flavor.setDishId(dishId));
             dishFlavorMapper.insert(flavors);
         }
     }
@@ -133,8 +129,8 @@ public class DishServiceImpl implements DishService {
                 .in(DishFlavor::getDishId, idList);
         dishFlavorMapper.delete(flavorWrapper);
 
-        // 删除菜品数据（使用 MyBatis-Plus 提供的批量删除方法）
-        dishMapper.deleteBatchIds(idList);
+        // 删除菜品数据（使用 MyBatis-Plus 按主键批量删除）
+        dishMapper.deleteByIds(idList);
     }
 
     /**
@@ -200,7 +196,7 @@ public class DishServiceImpl implements DishService {
     }
 
     /**
-     * 根据分类ID查询菜品
+     * 条件查询菜品和口味
      * @param dish
      * @return
      */

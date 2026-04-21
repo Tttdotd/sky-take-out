@@ -10,7 +10,7 @@ sky:
     port: 3306
     database: sky_take_out
     username: root
-    password: 20030503_Zrd
+    password: root
   wechat:
     appid: wxe5c17d39ac67d23b
     secret: 467ad623342de7262e58f51a94a94bed
@@ -21,3 +21,9 @@ sky:
     weChatPayCertFilePath: D:\pay\wechatpy.pem
     notifyUrl: http://localhost:8080
     refundNotifyUrl: http://localhost:8080/notify/refundSuccess
+  minio:
+    endpoint: http://127.0.0.1:9000
+    access-key: minioadmin
+    secret-key: minioadmin
+    bucket-name: sky-take-out
+    public-endpoint: http://127.0.0.1:9000

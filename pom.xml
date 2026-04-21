@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.3</version>
+        <version>3.5.12</version>
     </parent>
     <groupId>com.sky</groupId>
     <artifactId>sky-take-out</artifactId>
@@ -18,27 +18,24 @@
         <module>sky-server</module>
     </modules>
     <properties>
-        <mybatis.spring>2.2.0</mybatis.spring>
-        <lombok>1.18.20</lombok>
+        <lombok>1.18.38</lombok>
         <fastjson>1.2.76</fastjson>
         <commons.lang>2.6</commons.lang>
-        <druid>1.2.1</druid>
-        <pagehelper>1.3.0</pagehelper>
+        <druid>1.2.25</druid>
+        <pagehelper>2.1.1</pagehelper>
         <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
         <aspectj>1.9.4</aspectj>
-        <jjwt>0.9.1</jjwt>
-        <jaxb-api>2.3.1</jaxb-api>
+        <jjwt>0.11.5</jjwt>
+        <jaxb-api>4.0.2</jaxb-api>
         <poi>3.16</poi>
         <mybatis-plus>3.5.15</mybatis-plus>
+        <mybatis.spring.boot>3.0.4</mybatis.spring.boot>
         <httpclient>4.5.13</httpclient>
+        <openapi>2.8.13</openapi>
+        <minio>8.5.17</minio>
     </properties>
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.mybatis.spring.boot</groupId>
-                <artifactId>mybatis-spring-boot-starter</artifactId>
-                <version>${mybatis.spring}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -60,7 +57,7 @@
 
             <dependency>
                 <groupId>com.alibaba</groupId>
-                <artifactId>druid-spring-boot-starter</artifactId>
+                <artifactId>druid-spring-boot-3-starter</artifactId>
                 <version>${druid}</version>
             </dependency>
 
@@ -84,7 +81,17 @@
 
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt</artifactId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt}</version>
             </dependency>
 
@@ -95,8 +102,8 @@
             </dependency>
 
             <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
                 <version>${jaxb-api}</version>
             </dependency>
 
@@ -119,17 +126,32 @@
             </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
                 <version>${mybatis-plus}</version>
             </dependency>
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis.spring.boot}</version>
+            </dependency>
 
-            <!-- httpclient -->
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${httpclient}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${openapi}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

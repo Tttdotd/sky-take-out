@@ -1,6 +1,5 @@
 package com.sky.controller.admin;
 
-import com.github.pagehelper.Page;
 import com.sky.constant.JwtClaimsConstant;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
@@ -42,7 +41,7 @@ public class EmployeeController {
      * @return
      */
     @PostMapping("/login")
-    @Operation(summary = "用户登录", description = "使用用户名和密码进行登录")
+    @Operation(summary = "员工登录", description = "使用用户名和密码进行登录")
     public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO employeeLoginDTO) {
         log.info("员工登录：{}", employeeLoginDTO);
 
@@ -67,18 +66,18 @@ public class EmployeeController {
     }
 
     /**
-     * 退出
+     * 员工登出
      *
      * @return
      */
     @PostMapping("/logout")
-    @Operation(summary = "用户退出", description = "用户退出当前账户")
+    @Operation(summary = "员工登出", description = "员工登出当前账户")
     public Result<String> logout() {
         return Result.success();
     }
 
     /**
-     * 新增
+     * 新增员工
      * @param employeeDTO
      * @return
      */

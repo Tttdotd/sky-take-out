@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Schema(description = "员工登录DTO")
 public class EmployeeLoginDTO implements Serializable {
 
-    @Schema(description = "用户名", example = "admin")
+    @Schema(description = "员工名", example = "admin")
     private String username;
 
     @Schema(description = "密码", example = "123456")

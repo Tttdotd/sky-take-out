@@ -25,12 +25,4 @@ public interface EmployeeMapper extends BaseMapper<Employee> {
      * @return
      */
     Page<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
-
-    /**
-     * 根据主键id查询
-     * @param id
-     * @return
-     */
-    @Select("select * from employee where id = #{id}")
-    Employee queryById(Long id);
 }

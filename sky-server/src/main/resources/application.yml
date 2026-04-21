@@ -60,3 +60,9 @@ sky:
     weChatPayCertFilePath: ${sky.wechat.weChatPayCertFilePath}
     notifyUrl: ${sky.wechat.notifyUrl}
     refundNotifyUrl: ${sky.wechat.refundNotifyUrl}
+  minio:
+    endpoint: ${sky.minio.endpoint}
+    access-key: ${sky.minio.access-key}
+    secret-key: ${sky.minio.secret-key}
+    bucket-name: ${sky.minio.bucket-name}
+    public-endpoint: ${sky.minio.public-endpoint}

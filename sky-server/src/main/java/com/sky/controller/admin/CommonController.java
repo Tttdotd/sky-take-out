@@ -24,12 +24,12 @@ public class CommonController {
     /**
      * 上传文件
      * @param file 上传的文件（multipart/form-data 格式，虽然在 Body 中，但需要使用 @RequestParam 接收）
-     * @return 文件访问路径
+     * @return MinIO 文件访问路径
      */
     @PostMapping("/upload")
-    @Operation(summary = "文件上传", description = "通过浏览器上传文件")
+    @Operation(summary = "文件上传", description = "通过浏览器上传文件到 MinIO")
     public Result<String> upload(@RequestParam("file") MultipartFile file) {
-        log.info("开始上传文件: {}", file.getOriginalFilename());
+        log.info("开始上传文件到 MinIO: {}", file.getOriginalFilename());
         String filePath = commonService.upload(file);
         return Result.success(filePath);
     }
