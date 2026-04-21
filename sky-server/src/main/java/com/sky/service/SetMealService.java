@@ -50,11 +50,11 @@ public interface SetMealService {
     void startOrStop(Integer status, Long id);
 
     /**
-     * 条件查询
-     * @param setmeal
+     * 根据分类id查询套餐
+     * @param
      * @return
      */
-    List<Setmeal> list(Setmeal setmeal);
+    List<Setmeal> list(Long categoryId);
 
     /**
      * 根据id查询菜品选项

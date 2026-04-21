@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Dish;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -218,13 +220,17 @@ public class SetMealServiceImpl implements SetMealService {
     }
 
     /**
-     * 条件查询
-     * @param setmeal
+     * 根据分类id查询套餐
+     * @param categoryId 分类id
      * @return
      */
-    public List<Setmeal> list(Setmeal setmeal) {
-        List<Setmeal> list = setMealMapper.list(setmeal);
-        return list;
+    @Cacheable(cacheNames = "setmeal", key = "#categoryId")
+    public List<Setmeal> list(Long categoryId) {
+        Setmeal setmeal = new Setmeal();
+        setmeal.setCategoryId(categoryId);
+        setmeal.setStatus(StatusConstant.ENABLE);
+
+        return setMealMapper.list(setmeal);
     }
 
     /**

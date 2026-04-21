@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.DishStatusConstant;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
@@ -13,9 +14,11 @@ import com.sky.entity.DishFlavor;
 import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
+import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +27,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +39,9 @@ public class DishServiceImpl implements DishService {
 
     @Autowired
     private DishFlavorMapper dishFlavorMapper;
+
+    @Autowired
+    private SetmealDishMapper  setmealDishMapper;
 
     /**
      * 新增菜品和对应口味
@@ -89,13 +93,14 @@ public class DishServiceImpl implements DishService {
     /**
      * 批量删除菜品
      * @param ids 菜品id，多个id用逗号分隔，例如：1,2,3
+     * @return 被关联的分类id集合
      */
     @Transactional
     @Override
     @CacheEvict(value = "dish", allEntries = true)
     public void deleteBatch(String ids) {
         if (ids == null || ids.isEmpty()) {
-            return;
+            return ;
         }
 
         // 将字符串转换为Long列表
@@ -103,22 +108,15 @@ public class DishServiceImpl implements DishService {
                 .map(String::trim)
                 .map(Long::parseLong)
                 .collect(Collectors.toList());
-
-        // 判断是否可以删除：是否存在起售中的菜品
+        // 判断是否可以删除
         for (Long id : idList) {
+            //起售中的菜品不能删除
             Dish dish = dishMapper.selectById(id);
-            if (dish == null) {
-                continue;
-            }
-            // 起售中的菜品不能删除
-            if (dish.getStatus() == 1) {
+            if (dish.getStatus().equals(DishStatusConstant.START)) {
                 throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
             }
-        }
-
-        // 判断是否可以删除：是否被套餐关联
-        for (Long id : idList) {
-            Integer count = dishMapper.countByDishId(id);
+            //被套餐关联的菜品不能删除
+            Integer count = setmealDishMapper.countByDishId(id);
             if (count > 0) {
                 throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
             }

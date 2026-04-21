@@ -1,5 +1,6 @@
 package com.sky.controller.admin;
 
+import com.sky.constant.RedisCacheConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
@@ -14,6 +15,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 菜品管理
@@ -64,8 +66,6 @@ public class DishController {
     public Result delete(@RequestParam("ids") String ids) {
         log.info("批量删除菜品: {}", ids);
         dishService.deleteBatch(ids);
-
-        //TODO: 清理缓存
         return Result.success();
     }
 
@@ -115,5 +115,4 @@ public class DishController {
         return Result.success(list);
     }
 
-    
 }

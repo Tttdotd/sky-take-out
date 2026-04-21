@@ -7,6 +7,7 @@ import com.sky.result.PageResult;
 import com.sky.vo.DishVO;
 
 import java.util.List;
+import java.util.Set;
 
 public interface DishService {
     /**
@@ -25,6 +26,7 @@ public interface DishService {
     /**
      * 批量删除菜品
      * @param ids 菜品id，多个id用逗号分隔，例如：1,2,3
+     * @return 被关联的分类id集合
      */
     void deleteBatch(String ids);
 
