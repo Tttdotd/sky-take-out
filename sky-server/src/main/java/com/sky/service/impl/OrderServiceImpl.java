@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.pagehelper.Page;
@@ -142,12 +143,14 @@ public class OrderServiceImpl implements OrderService {
         User user = userMapper.selectById(userId);
 
         //调用微信支付接口，生成预支付交易单
-        JSONObject jsonObject = weChatPayUtil.pay(
-                ordersPaymentDTO.getOrderNumber(), //商户订单号
-                new BigDecimal(0.01), //支付金额，单位 元
-                "苍穹外卖订单", //商品描述
-                user.getOpenid() //微信用户的openid
-        );
+//        JSONObject jsonObject = weChatPayUtil.pay(
+//                ordersPaymentDTO.getOrderNumber(), //商户订单号
+//                new BigDecimal(0.01), //支付金额，单位 元
+//                "苍穹外卖订单", //商品描述
+//                user.getOpenid() //微信用户的openid
+//        );
+
+        JSONObject jsonObject = payFake();
 
         if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
             throw new OrderBusinessException("该订单已支付");
@@ -157,6 +160,17 @@ public class OrderServiceImpl implements OrderService {
         vo.setPackageStr(jsonObject.getString("package"));
 
         return vo;
+    }
+
+    private JSONObject payFake() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("code", "UNPAID");
+        jsonObject.put("nonceStr", "...");
+        jsonObject.put("paySign", "...");
+        jsonObject.put("timeStamp", "...");
+        jsonObject.put("signType", "...");
+        jsonObject.put("package", "...");
+        return jsonObject;
     }
 
     /**
