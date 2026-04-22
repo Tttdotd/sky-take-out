@@ -3,6 +3,7 @@ package com.sky.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sky.constant.MessageConstant;
+import com.sky.constant.WeChatConstant;
 import com.sky.dto.UserLoginDTO;
 import com.sky.entity.User;
 import com.sky.exception.LoginFailedException;
@@ -65,10 +66,10 @@ public class UserServiceImpl implements UserService {
     private String getOpenid(String code) {
         //调用微信服务器接口, 获取openId
         Map<String, String> map = new HashMap<>();
-        map.put("appid",  weChatProperties.getAppid());
-        map.put("secret", weChatProperties.getSecret());
-        map.put("js_code", code);
-        map.put("grant_type", "authorization_code");
+        map.put(WeChatConstant.APPIDKEY,  weChatProperties.getAppid());
+        map.put(WeChatConstant.SECRETKEY, weChatProperties.getSecret());
+        map.put(WeChatConstant.JSCODEKEY, code);
+        map.put(WeChatConstant.GRANTTYPEKEY, "authorization_code");
 
         String json = HttpClientUtil.doGet(WX_LOGIN, map);
 
